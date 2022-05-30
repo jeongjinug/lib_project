@@ -303,7 +303,7 @@ def book_search() :
             toplevel3.destroy()
 
         modifybutton = Button(toplevel3, text = "수정", command = modify)
-        outbutton = Button(toplevel3, text = "탈퇴", command = delete)
+        outbutton = Button(toplevel3, text = "삭제", command = delete)
         cancelbutton = Button(toplevel3, text = "취소", command = cancel)
         modifybutton.place(x = 275, y = 400)
         outbutton.place(x = 325, y = 400)
