@@ -20,22 +20,21 @@ def Member_make() :
     def register() :
         MsgBox = messagebox.askquestion ('등록 확인','등록하시겠습니까??')
         if MsgBox == 'yes':
-            if (User['User_phone'] == phonetext.get()).any() :
+            if phonetext.get() in User['User_phone'].values.astype(str) :
                 messagebox.showinfo("중복", "이미 등록된 전화번호입니다.")
             else : 
                 today = datetime.datetime.now()
                 today = today.date()
                 messagebox.showinfo("등록 완료", "등록이 완료되었습니다.")
                 User.loc[phonetext.get()] = [phonetext.get(), nametext.get(), birthdaytext.get() ,sextext.get(), mailtext.get(), today, 'X', 0, 'X']
-                User.set_index('User_phone', inplace = True)
-                User.to_csv('UserMake_DF.csv', mode = 'w', header = True, encoding='utf-8-sig')
+                User.to_csv('UserMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
                 toplevel.destroy()
         else:
             messagebox.showinfo("등록 취소", "등록이 취소되었습니다.")
             toplevel.destroy()
         
     def overlapcheck() :
-        if (User['User_phone'] == phonetext.get()).any() :
+        if phonetext.get() in User['User_phone'].values.astype(str) :
             messagebox.showinfo("중복", "이미 등록된 전화번호입니다.")
         else : 
             messagebox.showinfo("사용 가능", "사용 가능한 전화번호입니다.")
@@ -47,7 +46,6 @@ def Member_make() :
     label=Label(toplevel, text="회원등록", font = ("돋움체", 20))
     label.place(x = 290, y = 30)
 
-    global phonetext
     phonelabel1 = Label(toplevel, text = "전화번호")
     phonelabel1.place(x = 225, y= 100)
     phonetext = Entry(toplevel, width = 20)
@@ -161,48 +159,59 @@ def Member_search() :
         def modify() :
             MsgBox = messagebox.askquestion ('수정 확인','수정하시겠습니까??')
             if MsgBox == 'yes':
-                if (phonetext3.get()) == (phonetext3.get()) :
-                    messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                    User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
-                    User.set_index('User_phone', inplace = True)
-                    User.to_csv('UserMake_DF.csv', mode = 'w', header = True, encoding='utf-8-sig')
-                    toplevel3.destroy()
-                    toplevel2.destroy()
-                    
-                elif (User['User_phone'] == phonetext3.get()).any() :
-                    messagebox.showinfo("중복", "이미 등록된 전화번호입니다.")
-
+                if (Search['User_withdrawcheck'] == 'O').any() :
+                    messagebox.showinfo("수정 불가능", "이미 탈퇴한 회원은 수정이 불가능합니다.")
                 else : 
-                    messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                    User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
-                    User.set_index('User_phone', inplace = True)
-                    User.to_csv('UserMake_DF.csv', mode = 'w', header = True, encoding='utf-8-sig')
-                    toplevel3.destroy()
-                    toplevel2.destroy()
+                    if Search.iloc[0]['User_phone'] == phonetext3.get() :
+                        messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
+                        User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
+                        User.to_csv('UserMake_DF.csv', mode = 'w',header = True, encoding='utf-8-sig')
+                        toplevel3.destroy()
+                        toplevel2.destroy()
+                        
+                    elif phonetext3.get() in User['User_phone'].values.astype(str) :
+                        messagebox.showinfo("중복", "이미 등록된 전화번호입니다.")
+                    
+
+                    else : 
+                        messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
+                        User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
+                        User.to_csv('UserMake_DF.csv', mode = 'w', header = True, encoding='utf-8-sig')
+                        toplevel3.destroy()
+                        toplevel2.destroy()
                     
             else:
                 messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
                 toplevel2.destroy()
         
         def overlapcheck() :
-            if (phonetext3.get()) == (phonetext3.get()) :
+            if Search.iloc[0]['User_phone'] == phonetext3.get() :
                 return 
             else : 
-                if (User['User_phone'] == phonetext3.get()).any() :
+                if  phonetext3.get() in User['User_phone'].values.astype(str) :
                     messagebox.showinfo("중복", "이미 등록된 전화번호입니다.")
                 else : 
                     messagebox.showinfo("사용 가능", "사용 가능한 전화번호입니다.")
 
         def out() :
-            if User['User_withdrawcheck'] == 'x' :
-                User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_withdrawcheck')] = 'O'
-                messagebox.showinfo("탈퇴 완료", "탈퇴가 완료되었습니다.")
-            else :
-                messagebox.showinfo("탈퇴 불가능", "이미 탈퇴한 회원은 탈퇴가 불가능합니다.")
+            MsgBox = messagebox.askquestion ('탈퇴 확인','탈퇴하시겠습니까??')
+            if MsgBox == 'yes':
+                if (Search['User_withdrawcheck'] == 'X').any() :
+                    User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_withdrawcheck')] = "O"
+                    User.to_csv('UserMake_DF.csv', mode = 'w',header = True, encoding='utf-8-sig')
+                    messagebox.showinfo("탈퇴 완료", "탈퇴가 완료되었습니다.")
+                    toplevel3.destroy()
+                    toplevel2.destroy()
+
+                elif (Search['User_rentcnt'] >= 1 ).any() :
+                    messagebox.showinfo("탈퇴 불가능", "대여 중인 회원은 탈퇴가 불가능합니다.")
+
+                elif (Search['User_withdrawcheck'] == 'O').any() :
+                    messagebox.showinfo("탈퇴 불가능", "이미 탈퇴한 회원은 탈퇴가 불가능합니다.")
             
-            toplevel3.destroy()
-            toplevel2.destroy()
-        
+            else : 
+                messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
+
         def cancel() :
             toplevel3.destroy()
 
@@ -213,7 +222,7 @@ def Member_search() :
         modifybutton.place(x = 275, y = 400)
         outbutton.place(x = 325, y = 400)
         cancelbutton.place(x = 375, y = 400)
-        overlapbutton.place(x = 480, y = 100)
+        overlapbutton.place(x = 480, y = 90)
 
     def quit2() :
         toplevel2.destroy()
