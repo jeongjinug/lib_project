@@ -80,6 +80,7 @@ def Member_make() :
 
 def Member_search() : 
     def search() :
+        global treeview
         treeview = ttk.Treeview(toplevel2, column = ["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"],
             displaycolumns=["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"])
         treeview.place(x= 50, y = 170)
@@ -103,11 +104,19 @@ def Member_search() :
         for i in range(len(Search)):
             treeview.insert("", "end", text = "", values=Search[i], iid = i)
 
-
+        choicebutton = Button(toplevel2, text = "선택")
+        choicebutton.bind('<Button>', choice)
+        choicebutton.place(x = 325, y = 400)
         treeview.bind('<Double-Button-1>', choice)
 
+
     def choice(event) :
-        Search = User[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get())]
+        sel = treeview.focus()
+
+        selectedname = treeview.item(sel).get("values")[0]
+        selectedphone = treeview.item(sel).get("values")[2]
+        Search = User[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname)]
+
         toplevel3 =Toplevel(window)
         toplevel3.geometry("700x500")
 
@@ -164,8 +173,8 @@ def Member_search() :
                 else : 
                     if Search.iloc[0]['User_phone'] == phonetext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
-                        User.to_csv('UserMake_DF.csv', mode = 'w',header = True, encoding='utf-8-sig')
+                        User.loc[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
+                        User.to_csv('UserMake_DF.csv', mode = 'w',index = False,header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
                         
@@ -175,14 +184,15 @@ def Member_search() :
 
                     else : 
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
-                        User.to_csv('UserMake_DF.csv', mode = 'w', header = True, encoding='utf-8-sig')
+                        User.loc[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
+                        User.to_csv('UserMake_DF.csv', mode = 'w', index = False,header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
-                    
+                        
             else:
                 messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
                 toplevel2.destroy()
+            
         
         def overlapcheck() :
             if Search.iloc[0]['User_phone'] == phonetext3.get() :
@@ -244,11 +254,8 @@ def Member_search() :
     nametext2.place(x = 325, y = 130)
 
     searchbutton = Button(toplevel2, text = "조회", command = search)
-    choicebutton = Button(toplevel2, text = "선택")
-    choicebutton.bind('<Button>', choice)
     cancelbutton = Button(toplevel2, text = "취소", command = quit2)
     searchbutton.place(x = 275, y = 400)
-    choicebutton.place(x = 325, y = 400)
     cancelbutton.place(x = 375, y = 400)
 
 def book_add() :
@@ -422,7 +429,7 @@ def book_search() :
     choicebutton.place(x = 325, y = 400)
     cancelbutton.place(x = 375, y = 400)
 
-def Rent() :
+def Rent_make() :
     toplevel_rent=Toplevel(window)
     toplevel_rent.geometry("700x500")
 
@@ -763,7 +770,7 @@ MemberSearch.place(x = 150, y = 200)
 button1 = Button(window, text = "도서 등록", command= book_add, width = 10, height = 2).place(x= 350, y =150)
 button2 = Button(window, text = "도서 조회", command= book_search, width = 10, height = 2).place(x= 350, y =200)
 
-Rent = Button(window, text = "도서 대여",command = Rent, width = 10, height = 2).place(x= 550, y =150)
+Rent = Button(window, text = "도서 대여",command = Rent_make, width = 10, height = 2).place(x= 550, y =150)
 Rentsearch = Button(window, text = "대여 조회", command = Rent_check,width = 10, height = 2).place(x= 550, y =200)
 
 window.mainloop()
