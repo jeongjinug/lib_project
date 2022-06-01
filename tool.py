@@ -42,7 +42,6 @@ def Member_make() :
         else : 
             messagebox.showinfo("사용 가능", "사용 가능한 전화번호입니다.")
 
-
     toplevel=Toplevel(window)
     toplevel.geometry("700x500")
 
@@ -429,7 +428,7 @@ def book_search() :
         descriptionlabel1 = Label(toplevel3, text = "도서 설명")
         descriptionlabel1.place(x = 225, y= 295)
         descriptiontext3 = Entry(toplevel3, width = 20)
-        descriptiontext3.insert(0, Search.iloc[0]['Book_author'])
+        descriptiontext3.insert(0, Search.iloc[0]['Book_description'])
         descriptiontext3.place(x = 325, y= 295)
 
         rentlabel1 = Label(toplevel3, text = "대여 여부")
@@ -444,14 +443,14 @@ def book_search() :
                 if (Search['Book_rentcheck'] == 'O').any() :
                     messagebox.showinfo("수정 불가능", "대여 중인 도서는 수정이 불가능합니다.")
                 else : 
-                    if Search.iloc[0]['Book_ISBN'] == ISBNtext3.get() :
+                    if str(Search.iloc[0]['Book_ISBN']) == ISBNtext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
                         Book.loc[(Book['Book_ISBN'] == selectedISBN) | (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get(), titletext3.get(), pubtext3.get() ,authortext3.get(), pricetext3.get(), linktext3.get(), descriptiontext3.get()]
                         Book.to_csv('BookMake_DF.csv', mode = 'w',header = True, index = False, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
 
-                    elif ISBNtext3.get() in Book['Book_ISBN'].values :
+                    elif ISBNtext3.get() in Book['Book_ISBN'].values.astype(str) :
                         messagebox.showinfo("중복", "중복된 ISBN 번호입니다.")
 
                     else : 
