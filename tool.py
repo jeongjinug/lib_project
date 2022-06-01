@@ -112,9 +112,14 @@ def Member_search() :
 
     def choice(event) :
         sel = treeview.focus()
+        try :
+            selectedname = treeview.item(sel).get("values")[0]
+            selectedphone = treeview.item(sel).get("values")[2]
 
-        selectedname = treeview.item(sel).get("values")[0]
-        selectedphone = treeview.item(sel).get("values")[2]
+        except IndexError :
+            messagebox.showinfo("오류", "조회된 정보가 없습니다.")
+            return
+
         Search = User[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname)]
 
         toplevel3 =Toplevel(window)
