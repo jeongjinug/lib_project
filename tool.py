@@ -2,10 +2,12 @@ import pandas as pd
 from tkinter import *
 from tkinter import messagebox, ttk
 import datetime
+from sklearn import tree
+
+from soupsieve import select
 
 User = pd.read_csv('UserMake_DF.csv', encoding='utf-8-sig')
 Book = pd.read_csv('BookMake_DF.csv', encoding='utf-8-sig')
-Rent = pd.read_csv('RentMake_DF.csv', encoding='utf-8-sig')
 
 window = Tk()
 window.title("도서 관리 프로그램")
@@ -42,10 +44,15 @@ def Member_make() :
             if (birthdaytext.get().replace(" ", "") == "") :
                 checkbirthday = "생일"
                 count2 = count2 + 1
+            if (sextext.get().replace(" ", "") == "") :
+                checksex = "성별"
+                count2 = count2 + 1
+            if (mailtext.get().replace(" ", "") == "") :
+                checkmail = "메일"
+                count2 = count2 + 1
             if count2 >= 1 :
-                messagebox.showinfo("잘못된 형식", "{} {} {} 입력이 되지 않았습니다.".format(checkphone,checkname,checkbirthday))
+                messagebox.showinfo("잘못된 형식", "{} {} {} {} {} 입력이 되지 않았습니다.".format(checkphone,checkname,checkbirthday,checksex,checkmail))
                 return
-
             if (len(phonetext.get().replace(" ", "")) <= 8)  :
                 checkphone = "전화번호"
                 count = count + 1
@@ -56,9 +63,9 @@ def Member_make() :
                 checkname = "이름"
                 count = count + 1
             if (len(birthdaytext.get().replace(" ", "")) <= 7)  :
-                checkphone = "생일"
+                checkbirthday = "생일"
                 count = count + 1
-            elif len(birthdaytext.get().replace(" ", "")) != 10 | (birthdaytext.get().replace(" ", "").count('-') != 2) | (birthdaytext.get().replace(" ", "")[4] != '-') | (birthdaytext.get().replace(" ", "")[7] != '-') | (any(eng2.isalpha() for eng2 in birthdaytext.get().replace(" ", ""))) | (validate_date(birthdaytext.get().replace(" ", "")) == False) :
+            elif len(birthdaytext.get().replace(" ", "")) != 10 | (birthdaytext.get().replace(" ", "").count('-') != 2) | (birthdaytext.get().replace(" ", "")[4] != '-') | (birthdaytext.get().replace(" ", "")[7] != '-') | (any(eng2.isalpha() for eng2 in birthdaytext.get().replace(" ", ""))) | (validate_date(birthdaytext.get().replace(" ", "")) == False) | (int((birthdaytext.get().replace(" ", "")[:4])) > 2017) :
                 checkbirthday = "생일"
                 count = count + 1
             if (sextext.get().replace(" ", "") != "남") & (sextext.get().replace(" ", "") != "여") :
@@ -98,6 +105,7 @@ def Member_make() :
             messagebox.showinfo("중복", "이미 등록된 전화번호입니다.")
         else : 
             messagebox.showinfo("사용 가능", "사용 가능한 전화번호입니다.")
+
 
     toplevel=Toplevel(window)
     toplevel.geometry("700x500")
@@ -178,9 +186,9 @@ def Member_search() :
         choicebutton.place(x = 325, y = 400)
         treeview.bind('<Double-Button-1>', choice)
 
-
     def choice(event) :
         sel = treeview.focus()
+
         try :
             selectedname = treeview.item(sel).get("values")[0]
             selectedphone = treeview.item(sel).get("values")[2]
@@ -190,6 +198,7 @@ def Member_search() :
             return
 
         Search = User[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname)]
+
 
         toplevel3 =Toplevel(window)
         toplevel3.geometry("700x500")
@@ -302,7 +311,7 @@ def Member_search() :
                     if Search.iloc[0]['User_phone'] == phonetext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
                         User.loc[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get().replace(" ", ""), nametext3.get().replace(" ", ""), birthdaytext3.get().replace(" ", "") ,sextext3.get().replace(" ", ""), mailtext3.get().replace(" ", "")]
-                        User.to_csv('UserMake_DF.csv', mode = 'w',index = False,header = True, encoding='utf-8-sig')
+                        User.to_csv('UserMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
                         
@@ -312,15 +321,14 @@ def Member_search() :
 
                     else : 
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        User.loc[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
-                        User.to_csv('UserMake_DF.csv', mode = 'w', index = False,header = True, encoding='utf-8-sig')
+                        User.loc[(User['User_phone'] == selectedphone.get()) | (User['User_name'] == selectedname.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
+                        User.to_csv('UserMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
-                        
+                    
             else:
                 messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
                 toplevel2.destroy()
-            
         
         def overlapcheck() :
             if Search.iloc[0]['User_phone'] == phonetext3.get() :
@@ -343,18 +351,19 @@ def Member_search() :
         def out() :
             MsgBox = messagebox.askquestion ('탈퇴 확인','탈퇴하시겠습니까??')
             if MsgBox == 'yes':
-                if (Search['User_withdrawcheck'] == 'X').any() :
-                    User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_withdrawcheck')] = "O"
-                    User.to_csv('UserMake_DF.csv', mode = 'w',header = True, encoding='utf-8-sig')
-                    messagebox.showinfo("탈퇴 완료", "탈퇴가 완료되었습니다.")
-                    toplevel3.destroy()
-                    toplevel2.destroy()
-
-                elif (Search['User_rentcnt'] >= 1 ).any() :
+                if (Search['User_rentcnt'] >= 1 ).any() :
                     messagebox.showinfo("탈퇴 불가능", "대여 중인 회원은 탈퇴가 불가능합니다.")
 
                 elif (Search['User_withdrawcheck'] == 'O').any() :
                     messagebox.showinfo("탈퇴 불가능", "이미 탈퇴한 회원은 탈퇴가 불가능합니다.")
+
+                elif (Search['User_withdrawcheck'] == 'X').any() :
+                    User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_withdrawcheck')] = "O"
+                    User.to_csv('UserMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+
+                    messagebox.showinfo("탈퇴 완료", "탈퇴가 완료되었습니다.")
+                    toplevel3.destroy()
+                    toplevel2.destroy()
             
             else : 
                 messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
@@ -605,7 +614,7 @@ def book_search() :
         descriptionlabel1 = Label(toplevel3, text = "도서 설명")
         descriptionlabel1.place(x = 225, y= 295)
         descriptiontext3 = Entry(toplevel3, width = 20)
-        descriptiontext3.insert(0, Search.iloc[0]['Book_description'])
+        descriptiontext3.insert(0, Search.iloc[0]['Book_author'])
         descriptiontext3.place(x = 325, y= 295)
 
         rentlabel1 = Label(toplevel3, text = "대여 여부")
@@ -656,14 +665,14 @@ def book_search() :
                 elif count >= 1 :
                     messagebox.showinfo("잘못된 형식", "{} {} 형식이 잘못되었습니다.".format(checkisbn,checkprice)) 
                 else : 
-                    if str(Search.iloc[0]['Book_ISBN']) == ISBNtext3.get() :
+                    if Search.iloc[0]['Book_ISBN'] == ISBNtext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
                         Book.loc[(Book['Book_ISBN'] == selectedISBN) | (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
-                        Book.to_csv('BookMake_DF.csv', mode = 'w',header = True, index = False, encoding='utf-8-sig')
+                        Book.to_csv('BookMake_DF.csv', mode = 'w', header = True, index = False, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
 
-                    elif ISBNtext3.get() in Book['Book_ISBN'].values.astype(str) :
+                    elif ISBNtext3.get() in Book['Book_ISBN'].values :
                         messagebox.showinfo("중복", "중복된 ISBN 번호입니다.")
 
                     else : 
@@ -698,7 +707,7 @@ def book_search() :
                 if (Search['Book_rentcheck'] == 'X').any() :
                     Clear = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())].index
                     Book.drop(Clear, inplace = True)
-                    Book.to_csv('BookMake_DF.csv', mode = 'w', header = True, encoding='utf-8-sig')
+                    Book.to_csv('BookMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                     messagebox.showinfo("삭제 완료", "삭제가 완료되었습니다.")
                     toplevel3.destroy()
                     toplevel2.destroy()
@@ -746,6 +755,8 @@ def book_search() :
     cancelbutton.place(x = 375, y = 400)
 
 def Rent_make() :
+    Rent = pd.read_csv('RentMake_DF.csv', encoding='utf-8-sig')
+
     toplevel_rent=Toplevel(window)
     toplevel_rent.geometry("700x500")
 
@@ -763,6 +774,8 @@ def Rent_make() :
     nametext2.place(x = 325, y = 130)
 
     def search() :
+        global treeview
+
         treeview = ttk.Treeview(toplevel_rent, column = ["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"],
             displaycolumns=["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"])
         treeview.place(x= 50, y = 170)
@@ -780,7 +793,28 @@ def Rent_make() :
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
 
-    def choice() :
+        Search = User[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get())]
+        Search = Search[['User_name', 'User_birthday', 'User_phone', 'User_sex', 'User_withdrawcheck', 'User_rentcnt']]
+        Search = Search.values.tolist()
+        
+        for i in range(len(Search)):
+            treeview.insert("", "end", text = "", values=Search[i], iid = i)
+
+        choicebutton = Button(toplevel_rent, text = "선택")
+        choicebutton.bind('<Button>', choice)
+        choicebutton.place(x = 325, y = 400)
+        treeview.bind('<Double-Button-1>', choice)
+
+    def choice(event) :
+        sel = treeview.focus()
+        
+        try :
+            selectedname = treeview.item(sel).get("values")[0]
+            selectedphone = treeview.item(sel).get("values")[2]
+        except IndexError :
+            messagebox.showinfo("오류", "조회된 정보가 없습니다.")
+            return
+
         toplevel_rent.destroy()
         toplevel2=Toplevel(window)
         toplevel2.geometry("700x500")
@@ -800,6 +834,8 @@ def Rent_make() :
 
 
         def search2() :
+            global treeview
+
             treeview = ttk.Treeview(toplevel2, column = ["제목", "저자", "ISBN", "가격", "출판사", "대여여부"],
                 displaycolumns=["제목", "저자", "ISBN", "가격", "출판사", "대여여부"])
             treeview.place(x= 50, y = 170)
@@ -817,7 +853,35 @@ def Rent_make() :
             treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
             treeview["show"] = "headings"
 
-        def choice2() :
+            Search = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())]
+            Search = Search[['Book_title', 'Book_author', 'Book_ISBN', 'Book_price', 'Book_pub', 'Book_rentcheck']]
+            Search = Search.values.tolist()
+        
+            for i in range(len(Search)):
+                treeview.insert("", "end", text = "", values=Search[i], iid = i)
+            
+            choicebutton = Button(toplevel2, text = "선택")
+            choicebutton.bind('<Button>', choice2)
+            choicebutton.place(x = 325, y = 400)
+            treeview.bind('<Double-Button-1>', choice2)
+
+        def choice2(event) :
+            sel = treeview.focus()
+            try :
+                selectedISBN = treeview.item(sel).get("values")[2]
+                selectedtitle = treeview.item(sel).get("values")[0]
+            except IndexError :
+                messagebox.showinfo("오류", "조회된 정보가 없습니다.")
+                return
+        
+            Book_Search = Book[(Book['Book_ISBN'] == selectedISBN) | (Book['Book_title'] == selectedtitle)]
+
+            if (Book_Search['Book_rentcheck'] == 'O').any() :
+                Rent_Search = Rent[(Rent['Book_ISBN'] == selectedISBN) | (Rent['User_phone'] == selectedphone)]
+                User_Search = User[(User['User_phone']) == ",".join(Rent_Search['User_phone'])]
+            else :
+                User_Search = User[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname)]
+
             toplevel2.destroy()
             toplevel3 =Toplevel(window)
             toplevel3.geometry("700x500")
@@ -828,81 +892,127 @@ def Rent_make() :
             titlelabel3 = Label(toplevel3, text = "제목")
             titlelabel3.place(x = 50, y= 85)
             titletext2 = Entry(toplevel3, width = 20)
+            titletext2.insert(0, Book_Search.iloc[0]['Book_title'])
             titletext2.place(x = 150, y= 85)
 
             authorlabel3 = Label(toplevel3, text = "저자")
             authorlabel3.place(x = 50, y= 120)
             authortext2 = Entry(toplevel3, width = 20)
+            authortext2.insert(0, Book_Search.iloc[0]['Book_author'])
             authortext2.place(x = 150, y= 120)
 
             pricelabel3 = Label(toplevel3, text = "가격")
             pricelabel3.place(x = 50, y=155 )
             pricetext2 = Entry(toplevel3, width = 20)
+            pricetext2.insert(0, Book_Search.iloc[0]['Book_price'])
             pricetext2.place(x = 150, y= 155)
 
             publabel3 = Label(toplevel3, text = "출판사")
             publabel3.place(x = 50, y= 190)
             pubtext2 = Entry(toplevel3, width = 20)
+            pubtext2.insert(0, Book_Search.iloc[0]['Book_pub'])
             pubtext2.place(x = 150, y= 190)
 
             linklabel3 = Label(toplevel3, text = "관련 링크")
             linklabel3.place(x = 50, y= 225)
             linktext2 = Entry(toplevel3, width = 20)
+            linktext2.insert(0, Book_Search.iloc[0]['Book_link'])
             linktext2.place(x = 150, y= 225)
 
             ISBNlabel = Label(toplevel3, text = "ISBN")
             ISBNlabel.place(x = 50, y= 260)
             ISBNtext = Entry(toplevel3, width = 20)
+            ISBNtext.insert(0, Book_Search.iloc[0]['Book_ISBN'])
             ISBNtext.place(x = 150, y= 260)
 
             descriptionlabel1 = Label(toplevel3, text = "도서 설명")
             descriptionlabel1.place(x = 50, y= 295)
             descriptiontext = Entry(toplevel3, width = 20)
+            descriptiontext.insert(0, Book_Search.iloc[0]['Book_description'])
             descriptiontext.place(x = 150, y= 295)
 
             phonelabel1 = Label(toplevel3, text = "전화번호")
             phonelabel1.place(x = 400, y= 85)
             phonetext = Entry(toplevel3, width = 20)
+            phonetext.insert(0, User_Search.iloc[0]['User_phone'])
             phonetext.place(x = 500, y= 85)
 
             namelabel1 = Label(toplevel3, text = "이름")
             namelabel1.place(x = 400, y= 137)
             nametext = Entry(toplevel3, width = 20)
+            nametext.insert(0, User_Search.iloc[0]['User_name'])
             nametext.place(x = 500, y= 137)
 
             birthdaylabel1 = Label(toplevel3, text = "생일")
             birthdaylabel1.place(x = 400, y=190 )
             birthdaytext = Entry(toplevel3, width = 20)
+            birthdaytext.insert(0, User_Search.iloc[0]['User_birthday'])
             birthdaytext.place(x = 500, y= 190)
 
             sexlabel1 = Label(toplevel3, text = "성별")
             sexlabel1.place(x = 400, y= 242)
             sextext = Entry(toplevel3, width = 20)
+            sextext.insert(0, User_Search.iloc[0]['User_sex'])
             sextext.place(x = 500, y= 242)
 
             maillabel1 = Label(toplevel3, text = "메일")
             maillabel1.place(x = 400, y= 295)
             mailtext = Entry(toplevel3, width = 20)
+            mailtext.insert(0, User_Search.iloc[0]['User_mail'])
             mailtext.place(x = 500, y= 295)
 
             rentlabel1 = Label(toplevel3, text = "대여 여부")
             rentlabel1.place(x = 100, y= 350)
             renttext = Entry(toplevel3, width = 5)
+            renttext.insert(0, Book_Search.iloc[0]['Book_rentcheck'])
             renttext.place(x = 170, y= 350)
 
-            rentlabel1 = Label(toplevel3, text = "대출 일자")
-            rentlabel1.place(x = 270, y= 350)
-            renttext = Entry(toplevel3, width = 10)
-            renttext.place(x = 340, y= 350)
+            rentdatelabel1 = Label(toplevel3, text = "대출 일자")
+            rentdatelabel1.place(x = 270, y= 350)
+            rentdatetext = Entry(toplevel3, width = 10)
+            if (Book_Search['Book_rentcheck'] == 'O').any() :
+                rentdatetext.insert(0, Rent_Search.iloc[0]['Rent_Date'])
+            rentdatetext.place(x = 340, y= 350)
 
-            rentlabel1 = Label(toplevel3, text = "반납 예정일")
-            rentlabel1.place(x = 480, y= 350)
-            renttext = Entry(toplevel3, width = 10)
-            renttext.place(x = 550, y= 350)
+            returndatelabel1 = Label(toplevel3, text = "반납 예정일")
+            returndatelabel1.place(x = 480, y= 350)
+            returndatetext = Entry(toplevel3, width = 10)
+            if (Book_Search['Book_rentcheck'] == 'O').any() :
+                returndatetext.insert(0, Rent_Search.iloc[0]['Rent_returndate'])
+            returndatetext.place(x = 550, y= 350)
 
             def modify() :
-                messagebox.showinfo("대여 완료", "대여가 완료되었습니다.")
-                toplevel3.destroy()
+                MsgBox = messagebox.askquestion("대여 확인", "대여하시겠습니까?")
+                if MsgBox == 'yes' :
+                    if (User_Search['User_withdrawcheck'] == 'O').any() :
+                        messagebox.showinfo("대여 불가능", "탈퇴한 회원은 대여가 불가능합니다.")
+                    elif (Book_Search['Book_rentcheck'] == 'O').any() :
+                        messagebox.showinfo("대여 불가능", "이미 대여 중인 도서는 대여가 불가능합니다.")
+                    else :
+                        today = datetime.datetime.now()
+                        today = today.date()
+                        returnday = datetime.timedelta(days = 14)
+                        messagebox.showinfo("대여 완료", "대여가 완료되었습니다. 반납일은 {} 입니다.".format(today+returnday))
+                        seq_max = str(Rent['Rent_seq'].max())
+                        if seq_max == 'nan' :
+                            Rent.loc[1] = [1, selectedISBN, selectedphone, today, today+returnday, 'O']
+                        else :
+                            seq_max = Rent['Rent_seq'].max()
+                            Rent.loc[seq_max+1] = [seq_max+1, selectedISBN, selectedphone, today, today+returnday, 'O']
+                        
+                        Book.loc[(Book['Book_ISBN'] == selectedISBN) | (Book['Book_title'] == selectedtitle), ('Book_rentcheck')] = "O"
+                        User.loc[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname), ('User_rentcnt')] += 1
+                        
+                        Rent.to_csv('RentMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+                        Book.to_csv('BookMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+                        User.to_csv('UserMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+
+                        toplevel3.destroy()
+                        
+                    
+                else : 
+                    messagebox.showinfo("대여 취소", "대여가 취소되었습니다.")
+                    toplevel3.destroy()
             
             def cancel() :
                 toplevel3.destroy()
@@ -918,27 +1028,25 @@ def Rent_make() :
 
 
         searchbutton = Button(toplevel2, text = "조회", command = search2)
-        choicebutton = Button(toplevel2, text = "선택", command = choice2)
         cancelbutton = Button(toplevel2, text = "취소", command = quit3)
         searchbutton.place(x = 275, y = 400)
-        choicebutton.place(x = 325, y = 400)
         cancelbutton.place(x = 375, y = 400)
 
     def quit2() :
         toplevel_rent.destroy()
 
     searchbutton = Button(toplevel_rent, text = "조회", command = search)
-    choicebutton = Button(toplevel_rent, text = "선택", command = choice)
     cancelbutton = Button(toplevel_rent, text = "취소", command = quit2)
     searchbutton.place(x = 275, y = 400)
-    choicebutton.place(x = 325, y = 400)
     cancelbutton.place(x = 375, y = 400)
 
 def Rent_check() :
+    Rent = pd.read_csv('RentMake_DF.csv', encoding='utf-8-sig')
+    
     toplevel2=Toplevel(window)
     toplevel2.geometry("700x500")
 
-    label=Label(toplevel2, text="도서조회", font = ("돋움체", 20))
+    label=Label(toplevel2, text="대여조회", font = ("돋움체", 20))
     label.place(x = 290, y = 30)
 
     ISBNlabel1 = Label(toplevel2, text = "ISBN")
@@ -952,6 +1060,8 @@ def Rent_check() :
     titletext2.place(x = 325, y = 130)
 
     def search() :
+        global treeview
+
         treeview = ttk.Treeview(toplevel2, column = ["제목", "저자", "ISBN", "가격", "출판사", "대여여부"],
             displaycolumns=["제목", "저자", "ISBN", "가격", "출판사", "대여여부"])
         treeview.place(x= 50, y = 170)
@@ -969,7 +1079,34 @@ def Rent_check() :
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
 
-    def choice2() :
+        Search = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())]
+        Search = Search[['Book_title', 'Book_author', 'Book_ISBN', 'Book_price', 'Book_pub', 'Book_rentcheck']]
+        Search = Search.values.tolist()
+    
+        for i in range(len(Search)):
+            treeview.insert("", "end", text = "", values=Search[i], iid = i)
+        
+        choicebutton = Button(toplevel2, text = "선택")
+        choicebutton.bind('<Button>', choice2)
+        choicebutton.place(x = 325, y = 400)
+        treeview.bind('<Double-Button-1>', choice2)
+
+    def choice2(event) :
+        sel = treeview.focus()
+
+        try :
+            selectedISBN = treeview.item(sel).get("values")[2]
+            selectedtitle = treeview.item(sel).get("values")[0]
+        except IndexError :
+            messagebox.showinfo("오류", "조회된 정보가 없습니다.")
+            return
+
+        Book_Search = Book[(Book['Book_ISBN'] == selectedISBN) | (Book['Book_title'] == selectedtitle)]
+        Rent_Search = Rent[(Rent['Book_ISBN']) == selectedISBN]
+
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            User_Search = User[(User['User_phone']) == ",".join(Rent_Search['User_phone'])]
+
         toplevel2.destroy()
         toplevel3 =Toplevel(window)
         toplevel3.geometry("700x500")
@@ -980,81 +1117,123 @@ def Rent_check() :
         titlelabel3 = Label(toplevel3, text = "제목")
         titlelabel3.place(x = 50, y= 85)
         titletext2 = Entry(toplevel3, width = 20)
+        titletext2.insert(0, Book_Search.iloc[0]['Book_title'])
         titletext2.place(x = 150, y= 85)
 
         authorlabel3 = Label(toplevel3, text = "저자")
         authorlabel3.place(x = 50, y= 120)
         authortext2 = Entry(toplevel3, width = 20)
+        authortext2.insert(0, Book_Search.iloc[0]['Book_author'])
         authortext2.place(x = 150, y= 120)
 
         pricelabel3 = Label(toplevel3, text = "가격")
         pricelabel3.place(x = 50, y=155 )
         pricetext2 = Entry(toplevel3, width = 20)
+        pricetext2.insert(0, Book_Search.iloc[0]['Book_price'])
         pricetext2.place(x = 150, y= 155)
 
         publabel3 = Label(toplevel3, text = "출판사")
         publabel3.place(x = 50, y= 190)
         pubtext2 = Entry(toplevel3, width = 20)
+        pubtext2.insert(0, Book_Search.iloc[0]['Book_pub'])
         pubtext2.place(x = 150, y= 190)
 
         linklabel3 = Label(toplevel3, text = "관련 링크")
         linklabel3.place(x = 50, y= 225)
         linktext2 = Entry(toplevel3, width = 20)
+        linktext2.insert(0, Book_Search.iloc[0]['Book_link'])
         linktext2.place(x = 150, y= 225)
 
         ISBNlabel = Label(toplevel3, text = "ISBN")
         ISBNlabel.place(x = 50, y= 260)
         ISBNtext = Entry(toplevel3, width = 20)
+        ISBNtext.insert(0, Book_Search.iloc[0]['Book_ISBN'])
         ISBNtext.place(x = 150, y= 260)
 
         descriptionlabel1 = Label(toplevel3, text = "도서 설명")
         descriptionlabel1.place(x = 50, y= 295)
         descriptiontext = Entry(toplevel3, width = 20)
+        descriptiontext.insert(0, Book_Search.iloc[0]['Book_description'])
         descriptiontext.place(x = 150, y= 295)
 
         phonelabel1 = Label(toplevel3, text = "전화번호")
         phonelabel1.place(x = 400, y= 85)
         phonetext = Entry(toplevel3, width = 20)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            phonetext.insert(0, User_Search.iloc[0]['User_phone'])
         phonetext.place(x = 500, y= 85)
 
         namelabel1 = Label(toplevel3, text = "이름")
         namelabel1.place(x = 400, y= 137)
         nametext = Entry(toplevel3, width = 20)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            nametext.insert(0, User_Search.iloc[0]['User_name'])
         nametext.place(x = 500, y= 137)
 
         birthdaylabel1 = Label(toplevel3, text = "생일")
         birthdaylabel1.place(x = 400, y=190 )
         birthdaytext = Entry(toplevel3, width = 20)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            birthdaytext.insert(0, User_Search.iloc[0]['User_birthday'])
         birthdaytext.place(x = 500, y= 190)
 
         sexlabel1 = Label(toplevel3, text = "성별")
         sexlabel1.place(x = 400, y= 242)
         sextext = Entry(toplevel3, width = 20)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            sextext.insert(0, User_Search.iloc[0]['User_sex'])
         sextext.place(x = 500, y= 242)
 
         maillabel1 = Label(toplevel3, text = "메일")
         maillabel1.place(x = 400, y= 295)
         mailtext = Entry(toplevel3, width = 20)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            mailtext.insert(0, User_Search.iloc[0]['User_mail'])
         mailtext.place(x = 500, y= 295)
 
         rentlabel1 = Label(toplevel3, text = "대여 여부")
         rentlabel1.place(x = 100, y= 350)
         renttext = Entry(toplevel3, width = 5)
+        renttext.insert(0, Book_Search.iloc[0]['Book_rentcheck'])
         renttext.place(x = 170, y= 350)
 
-        rentlabel1 = Label(toplevel3, text = "대출 일자")
-        rentlabel1.place(x = 270, y= 350)
-        renttext = Entry(toplevel3, width = 10)
-        renttext.place(x = 340, y= 350)
+        rentdatelabel1 = Label(toplevel3, text = "대출 일자")
+        rentdatelabel1.place(x = 270, y= 350)
+        rentdatetext = Entry(toplevel3, width = 10)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            rentdatetext.insert(0, Rent_Search.iloc[0]['Rent_Date'])
+        rentdatetext.place(x = 340, y= 350)
 
-        rentlabel1 = Label(toplevel3, text = "반납 예정일")
-        rentlabel1.place(x = 480, y= 350)
-        renttext = Entry(toplevel3, width = 10)
-        renttext.place(x = 550, y= 350)
+        returndatelabel1 = Label(toplevel3, text = "반납 예정일")
+        returndatelabel1.place(x = 480, y= 350)
+        returndatetext = Entry(toplevel3, width = 10)
+        if (Book_Search['Book_rentcheck'] == 'O').any() :
+            returndatetext.insert(0, Rent_Search.iloc[0]['Rent_returndate'])
+        returndatetext.place(x = 550, y= 350)
+            
 
         def modify() :
-            messagebox.showinfo("반납 완료", "반납이 완료되었습니다.")
-            toplevel3.destroy()
+            MsgBox = messagebox.askquestion("반납 확인", "반납하시겠습니까?")
+            if MsgBox == 'yes' :
+                if (Book_Search['Book_rentcheck'] == 'X').any() :
+                    messagebox.showinfo("반납 불가능", "빌리지 않은 도서는 반납이 불가능합니다.")
+                
+                else :
+                    messagebox.showinfo("반납 완료", "반납이 완료되었습니다.")
+                
+                    Book.loc[(Book['Book_ISBN'] == selectedISBN) | (Book['Book_title'] == selectedtitle), ('Book_rentcheck')] = "X"
+                    User.loc[(User['User_phone']) == ",".join(Rent_Search['User_phone']), ('User_rentcnt')] -= 1
+
+                    Rent.drop(Rent_Search.index, inplace = True)
+
+                    Rent.to_csv('RentMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+                    Book.to_csv('BookMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+                    User.to_csv('UserMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
+                    toplevel3.destroy()
+            
+            else : 
+                messagebox.showinfo("반납 취소", "반납이 취소되었습니다.")
+                toplevel3.destroy()
         
         def cancel() :
             toplevel3.destroy()
@@ -1068,10 +1247,8 @@ def Rent_check() :
         toplevel2.destroy()
 
     searchbutton = Button(toplevel2, text = "조회", command = search)
-    choicebutton = Button(toplevel2, text = "선택", command = choice2)
     cancelbutton = Button(toplevel2, text = "취소", command = quit2)
     searchbutton.place(x = 275, y = 400)
-    choicebutton.place(x = 325, y = 400)
     cancelbutton.place(x = 375, y = 400)
 
 titlelabel = Label(window, text = "도서 관리 프로그램", font = ("돋움체",30))
