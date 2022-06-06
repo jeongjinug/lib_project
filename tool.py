@@ -2,9 +2,6 @@ import pandas as pd
 from tkinter import *
 from tkinter import messagebox, ttk
 import datetime
-from sklearn import tree
-
-from soupsieve import select
 
 User = pd.read_csv('UserMake_DF.csv', encoding='utf-8-sig')
 Book = pd.read_csv('BookMake_DF.csv', encoding='utf-8-sig')
@@ -65,7 +62,7 @@ def Member_make() :
             if (len(birthdaytext.get().replace(" ", "")) <= 7)  :
                 checkbirthday = "생일"
                 count = count + 1
-            elif len(birthdaytext.get().replace(" ", "")) != 10 | (birthdaytext.get().replace(" ", "").count('-') != 2) | (birthdaytext.get().replace(" ", "")[4] != '-') | (birthdaytext.get().replace(" ", "")[7] != '-') | (any(eng2.isalpha() for eng2 in birthdaytext.get().replace(" ", ""))) | (validate_date(birthdaytext.get().replace(" ", "")) == False) | (int((birthdaytext.get().replace(" ", "")[:4])) > 2017) :
+            elif (len(birthdaytext.get().replace(" ", "")) != 10) | (birthdaytext.get().replace(" ", "").count('-') != 2) | (birthdaytext.get().replace(" ", "")[4] != '-') | (birthdaytext.get().replace(" ", "")[7] != '-') | (any(eng2.isalpha() for eng2 in birthdaytext.get().replace(" ", ""))) | (validate_date(birthdaytext.get().replace(" ", "")) == False) | (int((birthdaytext.get().replace(" ", "")[:4])) > 2017) :
                 checkbirthday = "생일"
                 count = count + 1
             if (sextext.get().replace(" ", "") != "남") & (sextext.get().replace(" ", "") != "여") :
@@ -174,8 +171,15 @@ def Member_search() :
         treeview.column("대여여부", width = 100, anchor = CENTER)
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
-        
-        Search = User[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get())]
+
+        if (phonetext2.get() == '') & (nametext2.get() == '') :
+            return
+        elif phonetext2.get() == '' :
+            Search = User[User['User_name'].str.contains(nametext2.get())]
+        elif nametext2.get() == '' :
+            Search = User[User['User_phone'].str.contains(phonetext2.get())]
+        else :
+            Search = User[User['User_phone'].str.contains(phonetext2.get()) | User['User_name'].str.contains(nametext2.get())]
         Search = Search[['User_name', 'User_birthday', 'User_phone', 'User_sex', 'User_withdrawcheck', 'User_rentcnt']]
         Search = Search.values.tolist()
         for i in range(len(Search)):
@@ -305,6 +309,8 @@ def Member_search() :
 
                 if (Search['User_withdrawcheck'] == 'O').any() :
                     messagebox.showinfo("수정 불가능", "이미 탈퇴한 회원은 수정이 불가능합니다.")
+                elif (Search['User_rentcnt'] >= 1 ).any() :
+                    messagebox.showinfo("수정 불가능", "대여 중인 회원은 수정이 불가능합니다.")
                 elif count >= 1 :
                     messagebox.showinfo("잘못된 형식", "{} {} {} {} {} 형식이 잘못되었습니다.".format(checkphone,checkname,checkbirthday,checksex,checkmail))
                 else : 
