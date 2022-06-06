@@ -155,8 +155,8 @@ def Member_make() :
 def Member_search() : 
     def search() :
         global treeview
-        treeview = ttk.Treeview(toplevel2, column = ["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"],
-            displaycolumns=["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"])
+        treeview = ttk.Treeview(toplevel2, column = ["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대출권수"],
+            displaycolumns=["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대출권수"])
         treeview.place(x= 50, y = 170)
         treeview.column("이름", width = 100, anchor = CENTER)
         treeview.heading("이름", text = "이름", anchor = CENTER)
@@ -168,8 +168,8 @@ def Member_search() :
         treeview.heading("성별", text = "성별", anchor = CENTER)
         treeview.column("탈퇴여부", width = 100, anchor = CENTER)
         treeview.heading("탈퇴여부", text = "탈퇴여부", anchor = CENTER)
-        treeview.column("대여여부", width = 100, anchor = CENTER)
-        treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
+        treeview.column("대출권수", width = 100, anchor = CENTER)
+        treeview.heading("대출권수", text = "대출권수", anchor = CENTER)
         treeview["show"] = "headings"
         
 
@@ -252,7 +252,7 @@ def Member_search() :
         mailform2 = Label(toplevel3, text = "EX) oooo@ooo.oo", font = ("돋움체", 8) ,fg = "red" )
         mailform2.place(x = 350, y = 310)
 
-        rentlabel = Label(toplevel3, text = "대여 여부")
+        rentlabel = Label(toplevel3, text = "대출 권수")
         rentlabel.place(x = 185, y= 340)
         renttext = Entry(toplevel3, width = 5)
         renttext.insert(0, Search.iloc[0]['User_rentcnt'])
@@ -336,7 +336,6 @@ def Member_search() :
                     
             else:
                 messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
-                toplevel2.destroy()
         
         def overlapcheck() :
             if Search.iloc[0]['User_phone'] == phonetext3.get() :
@@ -374,7 +373,7 @@ def Member_search() :
                     toplevel2.destroy()
             
             else : 
-                messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
+                messagebox.showinfo("탈퇴 취소", "탈퇴가 취소되었습니다.")
 
         def cancel() :
             toplevel3.destroy()
@@ -791,8 +790,8 @@ def Rent_make() :
     def search() :
         global treeview
 
-        treeview = ttk.Treeview(toplevel_rent, column = ["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"],
-            displaycolumns=["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대여여부"])
+        treeview = ttk.Treeview(toplevel_rent, column = ["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대출권수"],
+            displaycolumns=["이름", "생년월일", "전화번호", "성별", "탈퇴여부", "대출권수"])
         treeview.place(x= 50, y = 170)
         treeview.column("이름", width = 100, anchor = CENTER)
         treeview.heading("이름", text = "이름", anchor = CENTER)
@@ -804,8 +803,8 @@ def Rent_make() :
         treeview.heading("성별", text = "성별", anchor = CENTER)
         treeview.column("탈퇴여부", width = 100, anchor = CENTER)
         treeview.heading("탈퇴여부", text = "탈퇴여부", anchor = CENTER)
-        treeview.column("대여여부", width = 100, anchor = CENTER)
-        treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
+        treeview.column("대출권수", width = 100, anchor = CENTER)
+        treeview.heading("대출권수", text = "대출권수", anchor = CENTER)
         treeview["show"] = "headings"
 
         if (phonetext2.get() == '') & (nametext2.get() == '') :
