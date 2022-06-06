@@ -171,19 +171,14 @@ def Member_search() :
         treeview.column("대여여부", width = 100, anchor = CENTER)
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
+        
 
-        if (phonetext2.get() == '') & (nametext2.get() == '') :
-            return
-        elif phonetext2.get() == '' :
-            Search = User[User['User_name'].str.contains(nametext2.get())]
-        elif nametext2.get() == '' :
-            Search = User[User['User_phone'].str.contains(phonetext2.get())]
-        else :
-            Search = User[User['User_phone'].str.contains(phonetext2.get()) | User['User_name'].str.contains(nametext2.get())]
+        Search = User[User['User_phone']== phonetext2.get() | User['User_name']== nametext2.get()]
         Search = Search[['User_name', 'User_birthday', 'User_phone', 'User_sex', 'User_withdrawcheck', 'User_rentcnt']]
         Search = Search.values.tolist()
         for i in range(len(Search)):
             treeview.insert("", "end", text = "", values=Search[i], iid = i)
+
 
         choicebutton = Button(toplevel2, text = "선택")
         choicebutton.bind('<Button>', choice)
@@ -309,8 +304,7 @@ def Member_search() :
 
                 if (Search['User_withdrawcheck'] == 'O').any() :
                     messagebox.showinfo("수정 불가능", "이미 탈퇴한 회원은 수정이 불가능합니다.")
-                elif (Search['User_rentcnt'] >= 1 ).any() :
-                    messagebox.showinfo("수정 불가능", "대여 중인 회원은 수정이 불가능합니다.")
+
                 elif count >= 1 :
                     messagebox.showinfo("잘못된 형식", "{} {} {} {} {} 형식이 잘못되었습니다.".format(checkphone,checkname,checkbirthday,checksex,checkmail))
                 else : 
@@ -548,10 +542,17 @@ def book_search() :
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
 
-        Search = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())]
+
+        if (ISBNtext2.get() == '') & (titletext2.get() == '') :
+            return
+        elif ISBNtext2.get() == '' :
+            Search = Book[Book['Book_title'].str.contains(titletext2.get())]
+        elif titletext2.get() == '' :
+            Search = Book[Book['Book_ISBN'].astype(str).str.contains(ISBNtext2.get())]
+        else :
+            Search = Book[Book['Book_ISBN'].astype(str).str.contains(ISBNtext2.get()) | Book['Book_title'].str.contains(titletext2.get())]
         Search = Search[['Book_title', 'Book_author', 'Book_ISBN', 'Book_price', 'Book_pub', 'Book_rentcheck']]
         Search = Search.values.tolist()
-        
         for i in range(len(Search)):
             treeview.insert("", "end", text = "", values=Search[i], iid = i)
 
@@ -799,10 +800,16 @@ def Rent_make() :
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
 
-        Search = User[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get())]
+        if (phonetext2.get() == '') & (nametext2.get() == '') :
+            return
+        elif phonetext2.get() == '' :
+            Search = User[User['User_name'].str.contains(nametext2.get())]
+        elif nametext2.get() == '' :
+            Search = User[User['User_phone'].str.contains(phonetext2.get())]
+        else :
+            Search = User[User['User_phone'].str.contains(phonetext2.get()) | User['User_name'].str.contains(nametext2.get())]
         Search = Search[['User_name', 'User_birthday', 'User_phone', 'User_sex', 'User_withdrawcheck', 'User_rentcnt']]
         Search = Search.values.tolist()
-        
         for i in range(len(Search)):
             treeview.insert("", "end", text = "", values=Search[i], iid = i)
 
@@ -859,10 +866,16 @@ def Rent_make() :
             treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
             treeview["show"] = "headings"
 
-            Search = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())]
+            if (ISBNtext2.get() == '') & (titletext2.get() == '') :
+                return
+            elif ISBNtext2.get() == '' :
+                Search = Book[Book['Book_title'].str.contains(titletext2.get())]
+            elif titletext2.get() == '' :
+                Search = Book[Book['Book_ISBN'].astype(str).str.contains(ISBNtext2.get())]
+            else :
+                Search = Book[Book['Book_ISBN'].astype(str).str.contains(ISBNtext2.get()) | Book['Book_title'].str.contains(titletext2.get())]
             Search = Search[['Book_title', 'Book_author', 'Book_ISBN', 'Book_price', 'Book_pub', 'Book_rentcheck']]
             Search = Search.values.tolist()
-        
             for i in range(len(Search)):
                 treeview.insert("", "end", text = "", values=Search[i], iid = i)
             
@@ -1085,12 +1098,18 @@ def Rent_check() :
         treeview.heading("대여여부", text = "대여여부", anchor = CENTER)
         treeview["show"] = "headings"
 
-        Search = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())]
+        if (ISBNtext2.get() == '') & (titletext2.get() == '') :
+            return
+        elif ISBNtext2.get() == '' :
+            Search = Book[Book['Book_title'].str.contains(titletext2.get())]
+        elif titletext2.get() == '' :
+            Search = Book[Book['Book_ISBN'].astype(str).str.contains(ISBNtext2.get())]
+        else :
+            Search = Book[Book['Book_ISBN'].astype(str).str.contains(ISBNtext2.get()) | Book['Book_title'].str.contains(titletext2.get())]
         Search = Search[['Book_title', 'Book_author', 'Book_ISBN', 'Book_price', 'Book_pub', 'Book_rentcheck']]
         Search = Search.values.tolist()
-    
         for i in range(len(Search)):
-            treeview.insert("", "end", text = "", values=Search[i], iid = i)
+            treeview.insert("", "end", text = "", values=Search[i], iid = i)       
         
         choicebutton = Button(toplevel2, text = "선택")
         choicebutton.bind('<Button>', choice2)
