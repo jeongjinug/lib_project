@@ -173,7 +173,14 @@ def Member_search() :
         treeview["show"] = "headings"
         
 
-        Search = User[User['User_phone']== phonetext2.get() | User['User_name']== nametext2.get()]
+        if (phonetext2.get() == '') & (nametext2.get() == '') :
+            return
+        elif phonetext2.get() == '' :
+            Search = User[User['User_name'].str.contains(nametext2.get())]
+        elif nametext2.get() == '' :
+            Search = User[User['User_phone'].str.contains(phonetext2.get())]
+        else :
+            Search = User[User['User_phone'].str.contains(phonetext2.get()) | User['User_name'].str.contains(nametext2.get())]
         Search = Search[['User_name', 'User_birthday', 'User_phone', 'User_sex', 'User_withdrawcheck', 'User_rentcnt']]
         Search = Search.values.tolist()
         for i in range(len(Search)):
@@ -304,7 +311,8 @@ def Member_search() :
 
                 if (Search['User_withdrawcheck'] == 'O').any() :
                     messagebox.showinfo("수정 불가능", "이미 탈퇴한 회원은 수정이 불가능합니다.")
-
+                elif (Search['User_rentcnt'] >= 1 ).any() :
+                    messagebox.showinfo("수정 불가능", "대여 중인 회원은 수정이 불가능합니다.")
                 elif count >= 1 :
                     messagebox.showinfo("잘못된 형식", "{} {} {} {} {} 형식이 잘못되었습니다.".format(checkphone,checkname,checkbirthday,checksex,checkmail))
                 else : 
