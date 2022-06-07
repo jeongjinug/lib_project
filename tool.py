@@ -583,12 +583,13 @@ def book_search() :
         try :
             selectedISBN = treeview.item(sel).get("values")[1]
             selectedtitle = treeview.item(sel).get("values")[0]
+            chekcISBN = treeview.item(sel).get("values")[2]
         except IndexError :
             messagebox.showinfo("오류", "조회된 정보가 없습니다.")
             return
-
-        Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_author'] == selectedISBN)]
-
+        print(chekcISBN)
+        Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_author'] == selectedISBN) & (Book['Book_ISBN'].astype(int) == chekcISBN)]
+        print(Search)
         toplevel3 =Toplevel(window) 
         toplevel3.geometry("700x500")
 
@@ -697,19 +698,20 @@ def book_search() :
                 elif count >= 1 :
                     messagebox.showinfo("잘못된 형식", "{} {} 형식이 잘못되었습니다.".format(checkisbn,checkprice)) 
                 else : 
-                    if Search.iloc[0]['Book_ISBN'] == ISBNtext3.get() :
+                    if Search.iloc[0]['Book_ISBN'].astype(str) == ISBNtext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
+                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'] == chekcISBN), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
                         Book.to_csv('BookMake_DF.csv', mode = 'w', header = True, index = False, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
+                    
 
                     elif ISBNtext3.get() in Book['Book_ISBN'].values.astype(str) :
                         messagebox.showinfo("중복", "중복된 ISBN 번호입니다.")
 
                     else : 
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get() ,authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
+                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle & (Book['Book_ISBN'] == chekcISBN)), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get() ,authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
                         Book.to_csv('BookMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
@@ -717,7 +719,7 @@ def book_search() :
             else:
                 messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
                 toplevel2.destroy()
-
+            print(Book)
         def overlapcheck() :
             if str(Search.iloc[0]['Book_ISBN']) == ISBNtext3.get() :
                 return
@@ -737,7 +739,7 @@ def book_search() :
             MsgBox = messagebox.askquestion ('삭제 확인','삭제하시겠습니까??')
             if MsgBox == 'yes':
                 if (Search['Book_rentcheck'] == 'X').any() :
-                    Clear = Book[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle)].index
+                    Clear = Book[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'].astype(int) == chekcISBN)].index
                     Book.drop(Clear, inplace = True)
                     Book.to_csv('BookMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                     messagebox.showinfo("삭제 완료", "삭제가 완료되었습니다.")
