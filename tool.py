@@ -704,7 +704,7 @@ def book_search() :
                         toplevel3.destroy()
                         toplevel2.destroy()
 
-                    elif ISBNtext3.get() in Book['Book_ISBN'].values :
+                    elif ISBNtext3.get() in Book['Book_ISBN'].values.astype(str) :
                         messagebox.showinfo("중복", "중복된 ISBN 번호입니다.")
 
                     else : 
@@ -919,14 +919,12 @@ def Rent_make() :
                 return
         
             Book_Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_author'] == selectedISBN)]
-
             if (Book_Search['Book_rentcheck'] == 'O').any() :
-                Rent_Search = Rent[(Rent['Book_author'] == selectedISBN) | (Rent['User_phone'] == selectedphone)]
-                User_Search = User[(User['User_phone']) == ",".join(Rent_Search['User_phone'])]
+                Rent_Search = Rent[(Rent['Book_author'] == selectedISBN) ]
+                User_Search = User[(User['User_phone']) == selectedphone]
 
             else :
                 User_Search = User[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname)]
-
             toplevel2.destroy()
             toplevel3 =Toplevel(window)
             toplevel3.geometry("700x500")
