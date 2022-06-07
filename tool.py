@@ -366,7 +366,7 @@ def Member_search() :
                     messagebox.showinfo("탈퇴 불가능", "이미 탈퇴한 회원은 탈퇴가 불가능합니다.")
 
                 elif (Search['User_withdrawcheck'] == 'X').any() :
-                    User.loc[(User['User_phone'] == phonetext2.get()) | (User['User_name'] == nametext2.get()), ('User_withdrawcheck')] = "O"
+                    User.loc[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname), ('User_withdrawcheck')] = "O"
                     User.to_csv('UserMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
 
                     messagebox.showinfo("탈퇴 완료", "탈퇴가 완료되었습니다.")
