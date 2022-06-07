@@ -319,7 +319,7 @@ def Member_search() :
                 else : 
                     if Search.iloc[0]['User_phone'] == phonetext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        User.loc[(User['User_phone'] == selectedphone) | (User['User_name'] == selectedname), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get().replace(" ", ""), nametext3.get().replace(" ", ""), birthdaytext3.get().replace(" ", "") ,sextext3.get().replace(" ", ""), mailtext3.get().replace(" ", "")]
+                        User.loc[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get().replace(" ", ""), nametext3.get().replace(" ", ""), birthdaytext3.get().replace(" ", "") ,sextext3.get().replace(" ", ""), mailtext3.get().replace(" ", "")]
                         User.to_csv('UserMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
@@ -330,7 +330,7 @@ def Member_search() :
 
                     else : 
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        User.loc[(User['User_phone'] == selectedphone.get()) | (User['User_name'] == selectedname.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
+                        User.loc[(User['User_phone'] == selectedphone.get()) & (User['User_name'] == selectedname.get()), ('User_phone', 'User_name', 'User_birthday', 'User_sex', 'User_mail')] = [phonetext3.get(), nametext3.get(), birthdaytext3.get() ,sextext3.get(), mailtext3.get()]
                         User.to_csv('UserMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
