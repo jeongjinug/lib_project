@@ -921,9 +921,9 @@ def Rent_make() :
             Book_Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_author'] == selectedISBN)]
 
             if (Book_Search['Book_rentcheck'] == 'O').any() :
-                Rent_Search = Rent[(Rent['Book_author'] == selectedISBN) & (Rent['User_phone'] == selectedphone)]
-
+                Rent_Search = Rent[(Rent['Book_author'] == selectedISBN) | (Rent['User_phone'] == selectedphone)]
                 User_Search = User[(User['User_phone']) == ",".join(Rent_Search['User_phone'])]
+
             else :
                 User_Search = User[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname)]
 
@@ -1153,7 +1153,7 @@ def Rent_check() :
             return
 
         Book_Search = Book[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle)]
-        Rent_Search = Rent[(Rent['Book_ISBN']) == selectedISBN]
+        Rent_Search = Rent[(Rent['Book_author']) == selectedISBN]
 
         if (Book_Search['Book_rentcheck'] == 'O').any() :
             User_Search = User[(User['User_phone']) == ",".join(Rent_Search['User_phone'])]
