@@ -587,7 +587,7 @@ def book_search() :
             messagebox.showinfo("오류", "조회된 정보가 없습니다.")
             return
 
-        Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'] == str(selectedISBN))]
+        Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'].astype(int) == selectedISBN)]
 
         toplevel3 =Toplevel(window)
         toplevel3.geometry("700x500")
@@ -699,7 +699,7 @@ def book_search() :
                 else : 
                     if Search.iloc[0]['Book_ISBN'] == ISBNtext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        Book.loc[(Book['Book_ISBN'] == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
+                        Book.loc[(Book['Book_ISBN'].astype(int) == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
                         Book.to_csv('BookMake_DF.csv', mode = 'w', header = True, index = False, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
@@ -709,7 +709,7 @@ def book_search() :
 
                     else : 
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        Book.loc[(Book['Book_ISBN'] == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get() ,authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
+                        Book.loc[(Book['Book_ISBN'].astype(int) == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get() ,authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
                         Book.to_csv('BookMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
@@ -737,7 +737,7 @@ def book_search() :
             MsgBox = messagebox.askquestion ('삭제 확인','삭제하시겠습니까??')
             if MsgBox == 'yes':
                 if (Search['Book_rentcheck'] == 'X').any() :
-                    Clear = Book[(Book['Book_ISBN'].astype(str) == ISBNtext2.get()) | (Book['Book_title'] == titletext2.get())].index
+                    Clear = Book[(Book['Book_ISBN'].astype(int) == selectedISBN) & (Book['Book_title'] == selectedtitle)].index
                     Book.drop(Clear, inplace = True)
                     Book.to_csv('BookMake_DF.csv', mode = 'w', index = False, header = True, encoding='utf-8-sig')
                     messagebox.showinfo("삭제 완료", "삭제가 완료되었습니다.")
@@ -748,7 +748,7 @@ def book_search() :
                     messagebox.showinfo("삭제 불가능", "대여 중인 도서는 삭제가 불가능합니다.")
 
                 else : 
-                    messagebox.showinfo("수정 취소", "수정이 취소되었습니다.")
+                    messagebox.showinfo("삭제 취소", "삭제가 취소되었습니다.")
         
         def cancel() :
             toplevel3.destroy()
@@ -918,10 +918,10 @@ def Rent_make() :
                 messagebox.showinfo("오류", "조회된 정보가 없습니다.")
                 return
         
-            Book_Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'] == selectedISBN)]
+            Book_Search = Book[(Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'].astype(int) == selectedISBN)]
 
             if (Book_Search['Book_rentcheck'] == 'O').any() :
-                Rent_Search = Rent[(Rent['Book_ISBN'] == selectedISBN) & (Rent['User_phone'] == selectedphone)]
+                Rent_Search = Rent[(Rent['Book_ISBN'].astype(int) == selectedISBN) & (Rent['User_phone'] == selectedphone)]
                 User_Search = User[(User['User_phone']) == ",".join(Rent_Search['User_phone'])]
             else :
                 User_Search = User[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname)]
@@ -1044,7 +1044,7 @@ def Rent_make() :
                             seq_max = Rent['Rent_seq'].max()
                             Rent.loc[seq_max+1] = [seq_max+1, selectedISBN, selectedphone, today, today+returnday, 'O']
                         
-                        Book.loc[(Book['Book_ISBN'] == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_rentcheck')] = "O"
+                        Book.loc[(Book['Book_ISBN'].astype(int) == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_rentcheck')] = "O"
                         User.loc[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname), ('User_rentcnt')] += 1
                         
                         Rent.to_csv('RentMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
@@ -1151,7 +1151,7 @@ def Rent_check() :
             messagebox.showinfo("오류", "조회된 정보가 없습니다.")
             return
 
-        Book_Search = Book[(Book['Book_ISBN'] == selectedISBN) & (Book['Book_title'] == selectedtitle)]
+        Book_Search = Book[(Book['Book_ISBN'].astype(int) == selectedISBN) & (Book['Book_title'] == selectedtitle)]
         Rent_Search = Rent[(Rent['Book_ISBN']) == selectedISBN]
 
         if (Book_Search['Book_rentcheck'] == 'O').any() :
@@ -1271,7 +1271,7 @@ def Rent_check() :
                 else :
                     messagebox.showinfo("반납 완료", "반납이 완료되었습니다.")
                 
-                    Book.loc[(Book['Book_ISBN'] == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_rentcheck')] = "X"
+                    Book.loc[(Book['Book_ISBN'].astype(int) == selectedISBN) & (Book['Book_title'] == selectedtitle), ('Book_rentcheck')] = "X"
                     User.loc[(User['User_phone']) == ",".join(Rent_Search['User_phone']), ('User_rentcnt')] -= 1
 
                     Rent.drop(Rent_Search.index, inplace = True)
