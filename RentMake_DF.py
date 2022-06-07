@@ -1,7 +1,7 @@
 import pandas as pd
 import csv
 
-ProjectRentDf = pd.DataFrame({'Rent_seq' : [], 'Book_ISBN': [], \
+ProjectRentDf = pd.DataFrame({'Rent_seq' : [], 'Book_author': [], \
                                         'User_phone': [], 'Rent_Date': [], \
                                         'Rent_returndate': [], 'Rent_check': []})
 
