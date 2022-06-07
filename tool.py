@@ -1054,7 +1054,7 @@ def Rent_make() :
                             seq_max = Rent['Rent_seq'].max()
                             Rent.loc[seq_max+1] = [seq_max+1, selectedISBN, selectedphone, today, today+returnday, 'O']
                         
-                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'] == chekcISBN), ('Book_rentcheck')] = "O"
+                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'].astype(int) == chekcISBN), ('Book_rentcheck')] = "O"
                         User.loc[(User['User_phone'] == selectedphone) & (User['User_name'] == selectedname), ('User_rentcnt')] += 1
                         
                         Rent.to_csv('RentMake_DF.csv', mode = 'w', index = False ,header = True, encoding='utf-8-sig')
@@ -1162,7 +1162,7 @@ def Rent_check() :
             messagebox.showinfo("오류", "조회된 정보가 없습니다.")
             return
 
-        Book_Search = Book[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) &(Book['Book_ISBN'] == chekcISBN) ]
+        Book_Search = Book[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) &(Book['Book_ISBN'].astype(int) == chekcISBN) ]
         Rent_Search = Rent[(Rent['Book_author']) == selectedISBN]
 
         if (Book_Search['Book_rentcheck'] == 'O').any() :
@@ -1282,7 +1282,7 @@ def Rent_check() :
                 else :
                     messagebox.showinfo("반납 완료", "반납이 완료되었습니다.")
                 
-                    Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (), ('Book_rentcheck')] = "X"
+                    Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_title'].astype(int) == selectedtitle), ('Book_rentcheck')] = "X"
                     User.loc[(User['User_phone']) == ",".join(Rent_Search['User_phone']), ('User_rentcnt')] -= 1
 
                     Rent.drop(Rent_Search.index, inplace = True)
