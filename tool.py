@@ -698,9 +698,9 @@ def book_search() :
                 elif count >= 1 :
                     messagebox.showinfo("잘못된 형식", "{} {} 형식이 잘못되었습니다.".format(checkisbn,checkprice)) 
                 else : 
-                    if Search.iloc[0]['Book_ISBN'] == int(ISBNtext3.get()) :
+                    if str(Search.iloc[0]['Book_ISBN']) == ISBNtext3.get() :
                         messagebox.showinfo("수정 완료", "수정이 완료되었습니다.")
-                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'] == chekcISBN), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
+                        Book.loc[(Book['Book_author'] == selectedISBN) & (Book['Book_title'] == selectedtitle) & (Book['Book_ISBN'].astype(str) == str(chekcISBN)), ('Book_ISBN', 'Book_title', 'Book_pub', 'Book_author', 'Book_price', 'Book_link', 'Book_description')] = [ISBNtext3.get().replace(" ",""), titletext3.get(), pubtext3.get(),authortext3.get().replace(" ",""), pricetext3.get().replace(" ",""), linktext3.get(), descriptiontext3.get()]
                         Book.to_csv('BookMake_DF.csv', mode = 'w', header = True, index = False, encoding='utf-8-sig')
                         toplevel3.destroy()
                         toplevel2.destroy()
